@@ -1,5 +1,9 @@
 #!/bin/bash
 set -e
 
-echo "Updating EC2 system..."
-sudo yum update -y && sudo yum upgrade -y
+echo "Updating Amazon Linux system..."
+if command -v dnf >/dev/null 2>&1; then
+	sudo dnf update -y
+else
+	sudo yum update -y
+fi
