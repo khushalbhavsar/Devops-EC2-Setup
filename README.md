@@ -46,8 +46,8 @@ ssh -i your-key.pem ubuntu@EC2_PUBLIC_IP
 ## 🔹 STEP 3: Install Git (if not present)
 
 ```bash
-sudo apt update -y
-sudo apt install git -y
+sudo yum update -y
+sudo yum install git -y
 ```
 
 ---

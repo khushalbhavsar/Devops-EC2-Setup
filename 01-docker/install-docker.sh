@@ -3,7 +3,7 @@ set -e
 
 echo "Installing Docker on EC2..."
 
-sudo apt install -y ca-certificates curl gnupg lsb-release
+sudo yum install -y ca-certificates curl gnupg lsb-release
 
 curl -fsSL https://get.docker.com | sudo bash
 

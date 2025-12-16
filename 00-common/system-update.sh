@@ -2,4 +2,4 @@
 set -e
 
 echo "Updating EC2 system..."
-sudo apt update -y && sudo apt upgrade -y
+sudo yum update -y && sudo yum upgrade -y
