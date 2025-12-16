@@ -1,0 +1,5 @@
+22     SSH
+8080   Jenkins
+9000   SonarQube
+9090   Prometheus
+3000   Grafana
