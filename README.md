@@ -1,58 +1,50 @@
-Below are **clear, real-world steps** to run the **AWS EC2–optimized DevOps setup** on a fresh EC2 instance.
-Follow this exactly this is how it’s done in production.
+# DevOps EC2 Setup – Amazon Linux
+
+This guide explains **how to run the DevOps EC2–optimized scripts on Amazon Linux (AL2 / AL2023)** to install Docker, Jenkins, SonarQube, Prometheus, and Grafana.
 
 ---
 
-## 🔹 STEP 1: Launch EC2 Instance (AWS Console)
+## 1. Launch EC2 Instance
 
 1. Go to **AWS Console → EC2 → Launch Instance**
-
 2. Configure:
 
-   * **AMI**: Ubuntu Server **22.04 LTS**
-   * **Instance Type**:
-
-     * `t3.medium` ✅ (recommended)
-     * `t3.small` (works with swap)
-   * **Key Pair**: Create or select one (`.pem`)
+   * **AMI**: Amazon Linux 2 or Amazon Linux 2023
+   * **Instance type**: `t3.medium` (recommended)
    * **Storage**: Minimum **20 GB**
+   * **Key pair**: Create or use existing
+3. **Security Group – Inbound Rules**
 
-3. **Security Group (IMPORTANT)**
-   Add inbound rules:
+| Port | Purpose    |
+| ---- | ---------- |
+| 22   | SSH        |
+| 8080 | Jenkins    |
+| 9000 | SonarQube  |
+| 9090 | Prometheus |
+| 3000 | Grafana    |
 
-   | Type                                            | Port |
-   | ----------------------------------------------- | ---- |
-   | SSH                                             | 22   |
-   | Custom TCP                                      | 8080 |
-   | Custom TCP                                      | 9000 |
-   | Custom TCP                                      | 9090 |
-   | Custom TCP                                      | 3000 |
-   | Source: `My IP` (or 0.0.0.0/0 for testing only) |      |
-
-4. Launch instance
+4. Launch the instance
 
 ---
 
-## 🔹 STEP 2: Connect to EC2 via SSH
+## 2. Connect to EC2 Instance
 
 ```bash
 chmod 400 your-key.pem
-
-ssh -i your-key.pem ubuntu@EC2_PUBLIC_IP
+ssh -i your-key.pem ec2-user@EC2_PUBLIC_IP
 ```
 
 ---
 
-## 🔹 STEP 3: Install Git (if not present)
+## 3. Install Git
 
 ```bash
-sudo yum update -y
 sudo yum install git -y
 ```
 
 ---
 
-## 🔹 STEP 4: Upload Project to EC2
+## 4. Upload / Clone Project
 
 ### Option A: Clone from GitHub (Recommended)
 
@@ -61,16 +53,16 @@ git clone https://github.com/your-username/devops-ec2-setup.git
 cd devops-ec2-setup
 ```
 
-### Option B: Upload from Local Machine
+### Option B: Copy from Local Machine
 
 ```bash
-scp -i your-key.pem -r devops-ec2-setup ubuntu@EC2_PUBLIC_IP:/home/ubuntu/
+scp -i your-key.pem -r devops-ec2-setup ec2-user@EC2_PUBLIC_IP:/home/ec2-user/
 cd devops-ec2-setup
 ```
 
 ---
 
-## 🔹 STEP 5: Make Scripts Executable
+## 5. Make Scripts Executable
 
 ```bash
 chmod +x **/*.sh
@@ -78,17 +70,17 @@ chmod +x **/*.sh
 
 ---
 
-## 🔹 STEP 6: Run the Full Setup
+## 6. Run Installation (Recommended Order)
 
 ```bash
 ./run-all.sh
 ```
 
-⏳ This takes **10–15 minutes** (Docker + Jenkins + SonarQube)
+⏳ Installation time: **10–15 minutes**
 
 ---
 
-## 🔹 STEP 7: Reboot EC2 (Highly Recommended)
+## 7. Reboot Instance
 
 ```bash
 sudo reboot
@@ -98,7 +90,7 @@ Reconnect after reboot.
 
 ---
 
-## 🔹 STEP 8: Verify Services
+## 8. Verify Services
 
 ### Docker
 
@@ -113,7 +105,7 @@ docker ps
 sudo systemctl status jenkins
 ```
 
-Initial Admin Password:
+Initial password:
 
 ```bash
 sudo cat /var/lib/jenkins/secrets/initialAdminPassword
@@ -139,62 +131,79 @@ sudo systemctl status grafana-server
 
 ---
 
-## 🔹 STEP 9: Access Tools in Browser
+## 9. Access Applications
 
-Replace `EC2_PUBLIC_IP`:
+Replace `EC2_PUBLIC_IP` with your instance public IP.
 
-| Tool       | URL                         |
-| ---------- | --------------------------- |
-| Jenkins    | `http://EC2_PUBLIC_IP:8080` |
-| SonarQube  | `http://EC2_PUBLIC_IP:9000` |
-| Prometheus | `http://EC2_PUBLIC_IP:9090` |
-| Grafana    | `http://EC2_PUBLIC_IP:3000` |
+| Tool       | URL                       |
+| ---------- | ------------------------- |
+| Jenkins    | http://EC2_PUBLIC_IP:8080 |
+| SonarQube  | http://EC2_PUBLIC_IP:9000 |
+| Prometheus | http://EC2_PUBLIC_IP:9090 |
+| Grafana    | http://EC2_PUBLIC_IP:3000 |
 
 ---
 
-## 🔹 STEP 10: First-Time Login Credentials
+## 10. Default Credentials
 
 ### Jenkins
 
-* Password from:
-
-```bash
-sudo cat /var/lib/jenkins/secrets/initialAdminPassword
-```
+Retrieved during setup
 
 ### SonarQube
 
 ```
-username: admin
-password: admin
+Username: admin
+Password: admin
 ```
 
 ### Grafana
 
 ```
-username: admin
-password: admin
+Username: admin
+Password: admin
 ```
 
 ---
 
-## 🔹 Common Issues & Fixes
+## 11. Common Issues & Fixes
 
-### ❌ Jenkins not opening?
+### Docker permission denied
 
 ```bash
-sudo ufw disable
+newgrp docker
 ```
 
-### ❌ SonarQube fails on small EC2?
+### SonarQube fails on small instance
 
 ```bash
 free -h
 sudo swapon --show
 ```
 
-### ❌ Docker permission issue?
+### Jenkins not accessible
 
-```bash
-newgrp docker
-```
+* Check EC2 security group ports
+* Ensure Jenkins is running
+
+---
+
+## 12. Notes
+
+* Use `t3.medium` or higher for stable SonarQube
+* For production, restrict security group IPs
+* Reverse proxy + SSL recommended
+
+---
+
+## 13. Next Improvements
+
+* Jenkins CI/CD pipeline
+* Terraform automation
+* Nginx + HTTPS
+* Prometheus Node Exporter
+* AWS ALB integration
+
+---
+
+**Author:** DevOps EC2 Setup
