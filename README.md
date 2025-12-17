@@ -1,21 +1,80 @@
-# DevOps EC2 Setup – Amazon Linux
-
-This guide explains **how to run the DevOps EC2–optimized scripts on Amazon Linux (AL2 / AL2023)** to install Docker, Jenkins, SonarQube, Prometheus, and Grafana.
+**AWS EC2 (Amazon Linux 2 / Amazon Linux 2023)** and **ec2-user**.
 
 ---
 
-## 1. Launch EC2 Instance
+# 🚀 AWS EC2 DevOps Setup (Amazon Linux)
 
-1. Go to **AWS Console → EC2 → Launch Instance**
-2. Configure:
+This repository provides **production-ready shell scripts** to set up a complete **DevOps toolchain** on an **AWS EC2 instance** running:
 
-   * **AMI**: Amazon Linux 2 or Amazon Linux 2023
-   * **Instance type**: `t3.medium` (recommended)
-   * **Storage**: Minimum **20 GB**
-   * **Key pair**: Create or use existing
-3. **Security Group – Inbound Rules**
+✅ Amazon Linux 2
+✅ Amazon Linux 2023
 
-| Port | Purpose    |
+**Default user:** `ec2-user`
+
+---
+
+## 📌 Tools Installed
+
+* Docker
+* Docker Compose
+* Jenkins (CI/CD)
+* SonarQube (Code Quality – Dockerized)
+* Prometheus (Monitoring)
+* Grafana (Visualization)
+* EC2 Hardening + Swap Memory
+
+---
+
+## 📁 Project Structure
+
+```
+devops-ec2-setup/
+│
+├── 00-common/
+│   ├── system-update.sh
+│   ├── aws-ec2-hardening.sh
+│   └── swap-memory.sh
+│
+├── 01-docker/
+│   ├── install-docker.sh
+│   └── install-docker-compose.sh
+│
+├── 02-jenkins/
+│   └── install-jenkins.sh
+│
+├── 03-sonarqube/
+│   └── install-sonarqube.sh
+│
+├── 04-prometheus/
+│   └── install-prometheus.sh
+│
+├── 05-grafana/
+│   └── install-grafana.sh
+│
+├── aws-security-group-ports.txt
+└── run-all.sh
+```
+
+---
+
+## 🖥️ EC2 Instance Requirements
+
+| Requirement   | Value                              |
+| ------------- | ---------------------------------- |
+| Instance Type | `t2.medium` or higher              |
+| Storage       | 20–30 GB                           |
+| OS            | Amazon Linux 2 / Amazon Linux 2023 |
+| User          | ec2-user                           |
+
+> ⚠️ SonarQube requires **minimum 2 GB RAM**
+
+---
+
+## 🔐 Security Group Configuration
+
+Open the following ports in your EC2 Security Group:
+
+| Port | Service    |
 | ---- | ---------- |
 | 22   | SSH        |
 | 8080 | Jenkins    |
@@ -23,187 +82,148 @@ This guide explains **how to run the DevOps EC2–optimized scripts on Amazon Li
 | 9090 | Prometheus |
 | 3000 | Grafana    |
 
-4. Launch the instance
-
 ---
 
-## 2. Connect to EC2 Instance
+## 🔑 Connect to EC2
 
 ```bash
-chmod 400 your-key.pem
-ssh -i your-key.pem ec2-user@EC2_PUBLIC_IP
+ssh -i your-key.pem ec2-user@<EC2_PUBLIC_IP>
 ```
 
 ---
 
-## 3. Install Git
+## 📥 Clone Repository
 
 ```bash
-sudo yum install git -y
-```
-
----
-
-## 4. Upload / Clone Project
-
-### Option A: Clone from GitHub (Recommended)
-
-```bash
-git clone https://github.com/your-username/devops-ec2-setup.git
-cd devops-ec2-setup
-```
-
-### Option B: Copy from Local Machine
-
-```bash
-scp -i your-key.pem -r devops-ec2-setup ec2-user@EC2_PUBLIC_IP:/home/ec2-user/
+git clone https://github.com/<your-username>/devops-ec2-setup.git
 cd devops-ec2-setup
 ```
 
 ---
 
-## 5. Make Scripts Executable
+## 🔧 Make Scripts Executable
 
 ```bash
-chmod +x **/*.sh
+chmod +x **/*.sh run-all.sh
 ```
 
 ---
 
-## 6. Run Installation (Recommended Order)
+## ▶️ Run Full Setup
 
 ```bash
 ./run-all.sh
 ```
 
-⏳ Installation time: **10–15 minutes**
+⏳ Setup time: **10–15 minutes**
 
 ---
 
-## 7. Reboot Instance
+## 🔄 IMPORTANT (After Setup)
+
+Docker group changes require logout:
 
 ```bash
-sudo reboot
+exit
 ```
 
-Reconnect after reboot.
+Reconnect to EC2:
+
+```bash
+ssh -i your-key.pem ec2-user@<EC2_PUBLIC_IP>
+```
 
 ---
 
-## 8. Verify Services
+## 🌐 Access Installed Tools
 
-### Docker
+| Tool       | URL                           |
+| ---------- | ----------------------------- |
+| Jenkins    | `http://<EC2_PUBLIC_IP>:8080` |
+| SonarQube  | `http://<EC2_PUBLIC_IP>:9000` |
+| Prometheus | `http://<EC2_PUBLIC_IP>:9090` |
+| Grafana    | `http://<EC2_PUBLIC_IP>:3000` |
 
-```bash
-docker --version
-docker ps
-```
+---
 
-### Jenkins
-
-```bash
-sudo systemctl status jenkins
-```
-
-Initial password:
+## 🔑 Jenkins Initial Admin Password
 
 ```bash
 sudo cat /var/lib/jenkins/secrets/initialAdminPassword
 ```
 
-### SonarQube
-
-```bash
-docker ps | grep sonarqube
-```
-
-### Prometheus
-
-```bash
-sudo systemctl status prometheus
-```
-
-### Grafana
-
-```bash
-sudo systemctl status grafana-server
-```
-
 ---
 
-## 9. Access Applications
-
-Replace `EC2_PUBLIC_IP` with your instance public IP.
-
-| Tool       | URL                       |
-| ---------- | ------------------------- |
-| Jenkins    | http://EC2_PUBLIC_IP:8080 |
-| SonarQube  | http://EC2_PUBLIC_IP:9000 |
-| Prometheus | http://EC2_PUBLIC_IP:9090 |
-| Grafana    | http://EC2_PUBLIC_IP:3000 |
-
----
-
-## 10. Default Credentials
-
-### Jenkins
-
-Retrieved during setup
-
-### SonarQube
+## 🔑 Grafana Default Credentials
 
 ```
 Username: admin
 Password: admin
 ```
 
-### Grafana
-
-```
-Username: admin
-Password: admin
-```
+(You will be prompted to change it)
 
 ---
 
-## 11. Common Issues & Fixes
-
-### Docker permission denied
+## 🧪 Verify Installation
 
 ```bash
-newgrp docker
+docker --version
+docker-compose --version
+jenkins --version
+systemctl status grafana-server
 ```
 
-### SonarQube fails on small instance
+---
+
+## 🛠️ Troubleshooting
+
+### Jenkins not starting?
 
 ```bash
-free -h
-sudo swapon --show
+sudo systemctl status jenkins
+sudo journalctl -u jenkins
 ```
 
-### Jenkins not accessible
+### SonarQube not accessible?
 
-* Check EC2 security group ports
-* Ensure Jenkins is running
+```bash
+docker ps
+docker logs sonarqube
+```
 
----
+### Permission denied error?
 
-## 12. Notes
-
-* Use `t3.medium` or higher for stable SonarQube
-* For production, restrict security group IPs
-* Reverse proxy + SSL recommended
-
----
-
-## 13. Next Improvements
-
-* Jenkins CI/CD pipeline
-* Terraform automation
-* Nginx + HTTPS
-* Prometheus Node Exporter
-* AWS ALB integration
+```bash
+bash run-all.sh
+```
 
 ---
 
-**Author:** DevOps EC2 Setup
+## 🚀 Best Practices Used
+
+* Uses `yum / dnf` (Amazon Linux optimized)
+* Runs Dockerized services where applicable
+* Secure SSH hardening
+* Swap memory for stability
+* Systemd-managed services
+* Clean folder structure
+
+---
+
+## 📌 Next Enhancements (Optional)
+
+* Nginx Reverse Proxy
+* SSL with Let’s Encrypt
+* Jenkins pipeline templates
+* Terraform + EC2 UserData
+* Kubernetes (EKS / Kind)
+* ArgoCD + Helm
+
+---
+
+## 👨‍💻 Author
+
+**Khushal Bhavsar**
+DevOps | AWS | CI/CD | Cloud Automation
+

@@ -1,9 +1,13 @@
 #!/bin/bash
 set -e
 
-echo "Updating Amazon Linux system..."
-if command -v dnf >/dev/null 2>&1; then
-	sudo dnf update -y
+echo "🔄 Updating system packages..."
+
+if command -v dnf &>/dev/null; then
+  sudo dnf update -y
 else
-	sudo yum update -y
+  sudo yum update -y
 fi
+
+sudo yum install -y curl wget git unzip
+echo "✅ System updated"
